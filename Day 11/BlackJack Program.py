@@ -1,104 +1,196 @@
 from art import ascii_art
 
-import random 
+import random
+
+# Possible Blackjack card values.
+# There are four 10s because 10, Jack, Queen, and King all have a value of 10.
 cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
-start = input("Do you want to play a game of Blackjack? Type 'y' or 'n':   ").lower()
+# Ask the player if they want to start the game.
+start = input(
+    "Do you want to play a game of Blackjack? Type 'y' or 'n': "
+).lower()
 
 game_on = True
 
+# End the program if the player does not choose 'y'.
 if start == 'y':
     game_on = True
 else:
     exit()
 
-# Player
-player_cards = [random.choice(cards) , random.choice(cards)]
-print(f'     You cards: {player_cards}, current score: {player_cards[0] + player_cards[1]}')
+# Give the player two random cards.
+player_cards = [random.choice(cards), random.choice(cards)]
 
-#Computer
+print(
+    f'     Your cards: {player_cards}, '
+    f'current score: {player_cards[0] + player_cards[1]}'
+)
+
+# Give the computer two random cards.
 computer_cards = [random.choice(cards), random.choice(cards)]
-print(f'     Computers first card: {computer_cards[0]}')
 
+# Only show the computer's first card.
+print(f"     Computer's first card: {computer_cards[0]}")
+
+
+# Keep running the game until someone wins, loses, or draws.
 while game_on:
-    # User got BlackJack
+
+    # Check whether the player has a score of 21.
     if sum(player_cards) == 21:
-        print("You have Blackjack!\n You Win!")
+        print("You have Blackjack!\nYou Win!")
         game_on = False
-    # Computer got Blackjack
+
+    # Check whether the computer has a score of 21.
     elif sum(computer_cards) == 21:
         print(computer_cards)
-        print("Computer has Blackjack!\n You Lose!")
+        print("Computer has Blackjack!\nYou Lose!")
         game_on = False
-    # Score is over 21
+
+    # Check whether the player's score is over 21.
     elif sum(player_cards) > 21:
-        # Does user have an Ace? If Yes, change the 1 from 11
+
+        # If the player has an Ace worth 11,
+        # change it to 1 to reduce the total score.
         if 11 in player_cards:
             index = player_cards.index(11)
             player_cards[index] = 1
-            # is it still over 21?
+
+            # Check whether the player is still over 21.
             if sum(player_cards) > 21:
-                print(f"Total: {sum(player_cards)}. Your are bust. Computer won")
+                print(
+                    f"Total: {sum(player_cards)}. "
+                    "You are bust. Computer won."
+                )
                 game_on = False
+
+        # If there is no Ace to change, the player is bust.
         else:
-            print(f"Total: {sum(player_cards)}. Your are bust. Computer won")
+            print(
+                f"Total: {sum(player_cards)}. "
+                "You are bust. Computer won."
+            )
             game_on = False
 
-
+    # Check whether the computer's score is over 21.
     elif sum(computer_cards) > 21:
+
+        # If the computer has an Ace worth 11,
+        # change it to 1.
         if 11 in computer_cards:
             index = computer_cards.index(11)
             computer_cards[index] = 1
+
+            # Check whether the computer is still bust.
             if sum(computer_cards) > 21:
-                print(f"Total: {sum(computer_cards)}. Computer Got bust. You won")
+                print(
+                    f"Total: {sum(computer_cards)}. "
+                    "Computer is bust. You won."
+                )
                 game_on = False
+
+            # If the computer is no longer bust and has a higher score,
+            # the computer wins.
             elif sum(computer_cards) >= sum(player_cards):
-                print(f'"Computer wins" Player score: {sum(player_cards)} / Computer Score: {sum(computer_cards)}')
+                print(
+                    f'"Computer wins" '
+                    f'Player score: {sum(player_cards)} / '
+                    f'Computer score: {sum(computer_cards)}'
+                )
                 game_on = False
-            
+
+        # If the computer has no Ace to change, it is bust.
         else:
-            print(f"Total: {sum(computer_cards)}. Computer is bust. You won won")
+            print(
+                f"Total: {sum(computer_cards)}. "
+                "Computer is bust. You won."
+            )
             game_on = False
 
-    # Player
+    # Continue while the player's score is below 21.
     elif sum(player_cards) < 21:
-        next_card = input("Do you want another card? 'y' or 'n'").lower()
+
+        # Ask whether the player wants another card.
+        next_card = input(
+            "Do you want another card? Type 'y' or 'n': "
+        ).lower()
+
+        # Give the player another card.
         if next_card == 'y':
             next_card = random.choice(cards)
+
             print(f'Your next card is: {next_card}')
+
             player_cards.append(next_card)
+
             print(f'Player total: {sum(player_cards)}')
 
-        elif sum(computer_cards) == sum(player_cards):
-            print(f'"Draw" Player score: {sum(player_cards)} / Computer Score: {sum(computer_cards)}')
+        # If the player stops and both scores are equal, it is a draw.
+        elif (
+            next_card == 'n'
+            and sum(computer_cards) == sum(player_cards)
+        ):
+            print(
+                f'"Draw" Player score: {sum(player_cards)} / '
+                f'Computer score: {sum(computer_cards)}'
+            )
             game_on = False
-        else:
+
+        # If the player stops, the computer starts drawing cards.
+        elif next_card == 'n':
+
+            # The computer draws until its score reaches
+            # or passes the player's score.
             while sum(computer_cards) < sum(player_cards):
                 computer_next_card = random.choice(cards)
-                print(f'Computer next card is: {computer_next_card}')
-                computer_cards.append(computer_next_card)
-                print(f'Computer total: {sum(computer_cards)}')
 
+                print(
+                    f'Computer next card is: '
+                    f'{computer_next_card}'
+                )
+
+                computer_cards.append(computer_next_card)
+
+                print(
+                    f'Computer total: {sum(computer_cards)}'
+                )
+
+                # Stop drawing if the computer goes over 21.
                 if sum(computer_cards) > 21:
                     break
 
-            if sum(computer_cards) > sum(player_cards):
-                print(f'"Computer wins" Player score: {sum(player_cards)} / Computer Score: {sum(computer_cards)}')
+            # Check whether the computer is bust.
+            if sum(computer_cards) > 21:
+                print(
+                    f'"You win" '
+                    f'Player score: {sum(player_cards)} / '
+                    f'Computer score: {sum(computer_cards)}'
+                )
                 game_on = False
 
+            # Check whether the computer has a higher score.
+            elif sum(computer_cards) > sum(player_cards):
+                print(
+                    f'"Computer wins" '
+                    f'Player score: {sum(player_cards)} / '
+                    f'Computer score: {sum(computer_cards)}'
+                )
+                game_on = False
 
+            # Check whether both scores are equal.
+            elif sum(computer_cards) == sum(player_cards):
+                print(
+                    f'"Draw" '
+                    f'Player score: {sum(player_cards)} / '
+                    f'Computer score: {sum(computer_cards)}'
+                )
+                game_on = False
 
-    # Computer
+        # Handle invalid input.
+        else:
+            print("Please type 'y' or 'n'.")
 
-
-            
     else:
         print("Continue")
         game_on = False
-    # else:
-        # print("continue")
-
-
-
-
-
