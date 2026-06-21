@@ -1,158 +1,229 @@
-# . Process coins. 
-# a. If there are sufficient resources to make the drink selected, then the program should 
-# prompt the user to insert coins.  
-# b. Remember that quarters = $0.25, dimes = $0.10, nickles = $0.05, pennies = $0.01 
-# c. Calculate the monetary value of the coins inserted. E.g. 1 quarter, 2 dimes, 1 nickel, 2 
-# pennies = 0.25 + 0.1 x 2 + 0.05 + 0.01 x 2 = $0.52 
+# Coffee machine program
+# The machine checks ingredients, accepts coins, gives change,
+# keeps track of stock, and prints a report.
 
 
-# Stocks
+# Machine stock
 stocks = {
-            'water': 100, 
-            'milk': 50,
-            'coffee': 76, 
-            'money': 3,
-        }
+    'water': 100,
+    'milk': 50,
+    'coffee': 76,
+    'money': 3,
+    'quarters_count': 6,
+    'dimes_count': 5,
+    'nickles_count': 8,
+    'pennies_count': 10,
+}
 
 
-# Espresso
+# Drinks available
 espresso = {
-        'water': 50, 
-        'coffee': 18, 
-        'milk': 0,
-        'price': 2.5,
-    }
+    'water': 50,
+    'coffee': 18,
+    'milk': 0,
+    'price': 2.5,
+}
 
-# Late
 latte = {
-        'water': 200,  
-        'coffee': 24, 
-        'milk': 150,
-        'price': 3,
-    }
+    'water': 200,
+    'coffee': 24,
+    'milk': 150,
+    'price': 3,
+}
 
-
-# Cappuccino
 cappuccino = {
-        'water': 250, 
-        'coffee': 24, 
-        'milk': 100,
-        'price': 3.5,
-    }
+    'water': 250,
+    'coffee': 24,
+    'milk': 100,
+    'price': 3.5,
+}
+
+
+def check_stocks(drink):
+    """Checks whether the machine has enough ingredients."""
+
+    if stocks['water'] < drink['water']:
+        print("Sorry, there is not enough water.")
+        return False
+
+    if stocks['coffee'] < drink['coffee']:
+        print("Sorry, there is not enough coffee.")
+        return False
+
+    if stocks['milk'] < drink['milk']:
+        print("Sorry, there is not enough milk.")
+        return False
+
+    return True
+
+
+def check_payment(drink, drink_name):
+    """Collects payment, works out change, and completes the order."""
+
+    # Coin values
+    quarters_value = 0.25
+    dimes_value = 0.10
+    nickles_value = 0.05
+    pennies_value = 0.01
+
+    try:
+        # Ask the user how many coins they inserted
+        quarters_inserted = int(input("How many quarters have you inserted? "))
+        dimes_inserted = int(input("How many dimes have you inserted? "))
+        nickles_inserted = int(input("How many nickles have you inserted? "))
+        pennies_inserted = int(input("How many pennies have you inserted? "))
+
+        # Prevent negative numbers
+        if (
+            quarters_inserted < 0
+            or dimes_inserted < 0
+            or nickles_inserted < 0
+            or pennies_inserted < 0
+        ):
+            print("Please enter a positive number of coins.")
+            return
+
+    except ValueError:
+        print("Please enter whole numbers only.")
+        return
+
+    # Calculate how much the customer paid
+    total_paid = round(
+        (quarters_inserted * quarters_value)
+        + (dimes_inserted * dimes_value)
+        + (nickles_inserted * nickles_value)
+        + (pennies_inserted * pennies_value),
+        2
+    )
+
+    # Temporarily add the customer's coins to the machine
+    stocks['quarters_count'] += quarters_inserted
+    stocks['dimes_count'] += dimes_inserted
+    stocks['nickles_count'] += nickles_inserted
+    stocks['pennies_count'] += pennies_inserted
+
+    # Refund the customer if they did not pay enough
+    if total_paid < drink['price']:
+        print(f"Sorry, that is not enough money. ${total_paid:.2f} refunded.")
+
+        stocks['quarters_count'] -= quarters_inserted
+        stocks['dimes_count'] -= dimes_inserted
+        stocks['nickles_count'] -= nickles_inserted
+        stocks['pennies_count'] -= pennies_inserted
+        return
+
+    # Work out the amount of change needed
+    change_total = round(total_paid - drink['price'], 2)
+
+    print(f"Payment received: ${total_paid:.2f}")
+    print(f"Change due: ${change_total:.2f}")
+
+    # Counters used to show which coins are returned
+    change_number_quarters = 0
+    change_number_dimes = 0
+    change_number_nickles = 0
+    change_number_pennies = 0
+
+    # Give the largest coins first while the machine has them
+    while change_total > 0:
+        if change_total >= quarters_value and stocks['quarters_count'] > 0:
+            change_total = round(change_total - quarters_value, 2)
+            stocks['quarters_count'] -= 1
+            change_number_quarters += 1
+
+        elif change_total >= dimes_value and stocks['dimes_count'] > 0:
+            change_total = round(change_total - dimes_value, 2)
+            stocks['dimes_count'] -= 1
+            change_number_dimes += 1
+
+        elif change_total >= nickles_value and stocks['nickles_count'] > 0:
+            change_total = round(change_total - nickles_value, 2)
+            stocks['nickles_count'] -= 1
+            change_number_nickles += 1
+
+        elif change_total >= pennies_value and stocks['pennies_count'] > 0:
+            change_total = round(change_total - pennies_value, 2)
+            stocks['pennies_count'] -= 1
+            change_number_pennies += 1
+
+        else:
+            print("Sorry, the machine cannot provide exact change.")
+
+            # Put back any coins already selected as change
+            stocks['quarters_count'] += change_number_quarters
+            stocks['dimes_count'] += change_number_dimes
+            stocks['nickles_count'] += change_number_nickles
+            stocks['pennies_count'] += change_number_pennies
+
+            # Return the customer's inserted coins
+            stocks['quarters_count'] -= quarters_inserted
+            stocks['dimes_count'] -= dimes_inserted
+            stocks['nickles_count'] -= nickles_inserted
+            stocks['pennies_count'] -= pennies_inserted
+            return
+
+    # The purchase is successful, so update machine money and ingredients
+    stocks['money'] += drink['price']
+    stocks['water'] -= drink['water']
+    stocks['milk'] -= drink['milk']
+    stocks['coffee'] -= drink['coffee']
+
+    print(f"Preparing your {drink_name}.")
+    print(f"Please take your {drink_name}.")
+
+    print(
+        f"Return change:\n"
+        f"Quarters: {change_number_quarters}\n"
+        f"Dimes: {change_number_dimes}\n"
+        f"Nickles: {change_number_nickles}\n"
+        f"Pennies: {change_number_pennies}"
+    )
 
 
 coffee_machine_is_on = True
 
-
-
 while coffee_machine_is_on:
-    try:
-        select_option = input("What would you like? (espresso/latte/cappuccino): ").lower()
+    select_option = input(
+        "What would you like? (espresso/latte/cappuccino): "
+    ).lower()
 
-        if select_option != 'espresso' and select_option != 'latte' and select_option != 'cappuccino' and select_option != 'off' and select_option != 'report':
-            raise ValueError
-
-    except ValueError:
-        print("Please choose a valid answer!")
-        continue
-
-    def check_stocks():
-        if select_option == 'espresso': 
-            if stocks['water'] < espresso['water']: 
-                print("​Sorry there is not enough water.")
-            if stocks['coffee'] < espresso['coffee']:
-                print("​Sorry there is not enough coffee.")
-            if stocks['milk'] < espresso['milk']:
-                print("​Sorry there is not enough milk.")
-            else:
-                print(f"Please insert ${espresso['price']} in coins")
-                check_payment()
-
-        if select_option == 'latte':
-            if stocks['water'] < latte['water']: 
-                print("​Sorry there is not enough water.")
-            if stocks['coffee'] < latte['coffee']:
-                print("​Sorry there is not enough coffee.")
-            if stocks['milk'] < latte['milk']:
-                print("​Sorry there is not enough milk.")
-            else:
-                print(f"Please insert ${latte['price']} in coins")
-                check_payment()
-               
-
-        if select_option == 'cappuccino':
-            if stocks['water'] < cappuccino['water']: 
-                print("​Sorry there is not enough water.")
-            if stocks['coffee'] < cappuccino['coffee']:
-                print("​Sorry there is not enough coffee.")
-            if stocks['milk'] < cappuccino['milk']:
-                print("​Sorry there is not enough milk.")
-            else:
-                print(f"Please insert ${cappuccino['price']} in coins")
-                check_payment()
-
-    def check_payment():
-
-        # Money Pot
-        money_total = 2.5
-        quarters_value = 0.25
-        quarters_count = 6
-        dimes_value = 0.10
-        dimes_count = 5
-        nickles_value = 0.05
-        nickles_count = 8
-        pennies_value = 0.01
-        pennies_count = 10
-
-        # Payment
-        quarters_inserted = int(input("How many quarters have you inserted?"))
-        dimes_inserted = int(input("How many dimes have you inserted?"))
-        nickles_inserted = int(input("How many nickles have you inserted?"))
-        pennies_inserted = int(input("How many pennies have you inserted?"))
-
-        total_paid = (quarters_inserted * quarters_value) + (dimes_inserted * dimes_value) + (nickles_inserted * nickles_value) + (pennies_inserted * pennies_value)
-        quarters_count = quarters_count + quarters_inserted
-        dimes_count = dimes_count + dimes_inserted
-        nickles_count = nickles_count + nickles_inserted
-        pennies_count = pennies_count + pennies_inserted
-
-        money_total = money_total + total_paid
-
-        print(total_paid)
-        print(money_total)
-
-        if espresso['price'] <= total_paid and select_option == 'espresso':
-            print("Preparing your espresso")
-            stocks['money'] = stocks['money'] + total_paid
-            change_total = total_paid - espresso['price']
-            stocks['money'] = stocks['money']  - change_total
-            print(f"Please take your {change_total}")
-
-        if cappuccino['price'] <= total_paid and select_option == 'cappuccino':
-            print("Preparing your cappuccino")
-            stocks['money'] = stocks['money'] - cappuccino['price']
-            change_total = total_paid - cappuccino['price']
-            print(f"Please take your {change_total}")
-        if latte['price'] <= total_paid and select_option == 'latte':
-            print("preparing your latte")
-            stocks['money'] = stocks['money'] - latte['price']
-            change_total = total_paid - latte['price']
-            print(f"Please take your {change_total}")
-
-
-
-    if select_option == 'espresso':
-        check_stocks()
-        
-        # print("Espresso")
-    elif select_option == 'latte':
-        check_stocks()
-        # print("Latte")
-    elif select_option == 'cappuccino':
-        check_stocks()
-        # print("Cappuccino")
-    elif select_option == 'report':
-        print(f"Report:\n Water: {stocks['water']} ml\n Milk: {stocks['milk']} ml \n Coffee: {stocks['coffee']} g \n Money: ${stocks['money']}")
-    elif select_option == 'off':
+    # Turn off the machine
+    if select_option == 'off':
         print("Machine is turning off, bye!")
         coffee_machine_is_on = False
+
+    # Print the current machine stock
+    elif select_option == 'report':
+        print(
+            f"\nReport:"
+            f"\nWater: {stocks['water']} ml"
+            f"\nMilk: {stocks['milk']} ml"
+            f"\nCoffee: {stocks['coffee']} g"
+            f"\nDimes: {stocks['dimes_count']}"
+            f"\nQuarters: {stocks['quarters_count']}"
+            f"\nNickles: {stocks['nickles_count']}"
+            f"\nPennies: {stocks['pennies_count']}"
+            f"\nTotal: ${stocks['money']:.2f}\n"
+        )
+
+    # Espresso order
+    elif select_option == 'espresso':
+        if check_stocks(espresso):
+            print(f"Please insert ${espresso['price']:.2f} in coins")
+            check_payment(espresso, 'espresso')
+
+    # Latte order
+    elif select_option == 'latte':
+        if check_stocks(latte):
+            print(f"Please insert ${latte['price']:.2f} in coins")
+            check_payment(latte, 'latte')
+
+    # Cappuccino order
+    elif select_option == 'cappuccino':
+        if check_stocks(cappuccino):
+            print(f"Please insert ${cappuccino['price']:.2f} in coins")
+            check_payment(cappuccino, 'cappuccino')
+
+    # Invalid menu choice
+    else:
+        print("Please choose a valid answer!")
