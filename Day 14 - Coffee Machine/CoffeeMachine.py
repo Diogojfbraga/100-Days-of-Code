@@ -39,7 +39,22 @@ cappuccino = {
 }
 
 
-def check_stocks(drink):
+def print_report():
+    print(
+            f"\nReport:"
+            f"\nWater: {stocks['water']} ml"
+            f"\nMilk: {stocks['milk']} ml"
+            f"\nCoffee: {stocks['coffee']} g"
+            f"\nDimes: {stocks['dimes_count']}"
+            f"\nQuarters: {stocks['quarters_count']}"
+            f"\nNickles: {stocks['nickles_count']}"
+            f"\nPennies: {stocks['pennies_count']}"
+            f"\nTotal: ${stocks['money']:.2f}\n"
+    )
+
+
+
+def check_resources(drink):
     """Checks whether the machine has enough ingredients."""
 
     if stocks['water'] < drink['water']:
@@ -194,17 +209,7 @@ while coffee_machine_is_on:
 
     # Print the current machine stock
     elif select_option == 'report':
-        print(
-            f"\nReport:"
-            f"\nWater: {stocks['water']} ml"
-            f"\nMilk: {stocks['milk']} ml"
-            f"\nCoffee: {stocks['coffee']} g"
-            f"\nDimes: {stocks['dimes_count']}"
-            f"\nQuarters: {stocks['quarters_count']}"
-            f"\nNickles: {stocks['nickles_count']}"
-            f"\nPennies: {stocks['pennies_count']}"
-            f"\nTotal: ${stocks['money']:.2f}\n"
-        )
+        print_report()
 
     # Espresso order
     elif select_option == 'espresso':
