@@ -1,138 +1,174 @@
-# Create the snake body
-
-
 from turtle import Turtle, Screen
-import time, random
+import time
+import random
+
+
+# -------------------- Screen setup --------------------
+
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 600
+MOVE_DISTANCE = 20
+WALL_LIMIT = 290
 
 screen = Screen()
-screen.setup(width=600, height=600)
-screen.bgcolor('Black')
+screen.setup(width=SCREEN_WIDTH, height=SCREEN_HEIGHT)
+screen.bgcolor("black")
 screen.title("My Snake Game")
-screen.tracer(0)
+screen.tracer(0)  # We update the screen manually for smoother movement
 
-starting_positions = [(0,0), (-20,0), (-40,0)]
 
+# -------------------- Create snake --------------------
+
+starting_positions = [(0, 0), (-20, 0), (-40, 0)]
 squares = []
 
-scoreboard = Turtle()
-
-game_over = Turtle()
-
-
-
 for position in starting_positions:
-    square = Turtle(shape='square')
+    square = Turtle(shape="square")
     square.penup()
-
-    square.color('gray', 'white')
+    square.color("gray", "white")
     square.goto(position)
     squares.append(square)
 
 
+# -------------------- Food --------------------
 
-def food():
+def create_food():
+    """Create food in a random position on the same grid as the snake."""
 
     new_food = Turtle(shape="circle")
     new_food.penup()
     new_food.color("green")
     new_food.shapesize(stretch_len=0.5, stretch_wid=0.5)
 
-
-     # Detect collision with food
-    food_x = random.randint(-300,300)
-    food_y = random.randint(-300,300)
+    # Food moves in steps of 20, matching the snake's movement.
+    food_x = random.randrange(-280, 281, 20)
+    food_y = random.randrange(-280, 281, 20)
 
     new_food.goto(food_x, food_y)
-
     return new_food
 
-current_food = food()
 
-# Move the snake
-game_is_on = True
+current_food = create_food()
 
-# Turn the turtle right when D is pressed
+
+# -------------------- Scoreboard --------------------
+
+scoreboard = Turtle()
+scoreboard.penup()
+scoreboard.color("white")
+scoreboard.hideturtle()
+scoreboard.goto(0, 250)
+
+score = 0
+
+
+def update_scoreboard():
+    """Remove the old score and write the new one."""
+    scoreboard.clear()
+    scoreboard.write(
+        f"Score: {score}",
+        align="center",
+        font=("Arial", 18, "normal")
+    )
+
+
+update_scoreboard()
+
+
+# -------------------- Game-over message --------------------
+
+game_over_turtle = Turtle()
+game_over_turtle.penup()
+game_over_turtle.color("white")
+game_over_turtle.hideturtle()
+
+
+def show_game_over():
+    """Show the game-over text in the middle of the screen."""
+    game_over_turtle.goto(0, 0)
+    game_over_turtle.write(
+        "Game Over",
+        align="center",
+        font=("Arial", 24, "bold")
+    )
+
+
+# -------------------- Snake movement controls --------------------
+
 def move_right():
     squares[0].right(90)
 
 
-# Turn the turtle left when A is pressed
 def move_left():
     squares[0].left(90)
 
-score = 0
+
+# Register keys once, before the game loop.
+screen.listen()
+screen.onkeypress(move_right, "d")
+screen.onkeypress(move_left, "a")
+
+
+# -------------------- Add snake segment --------------------
+
+def add_segment():
+    """Add one square at the current end of the snake."""
+
+    new_square = Turtle(shape="square")
+    new_square.penup()
+    new_square.color("gray", "white")
+
+    # Start hidden so it does not flash in the centre of the screen.
+    new_square.hideturtle()
+    new_square.goto(squares[-1].position())
+    new_square.showturtle()
+
+    squares.append(new_square)
+
+
+# -------------------- Main game loop --------------------
+
+game_is_on = True
 
 while game_is_on:
-    screen.update()
-    time.sleep(0.1)
 
-
-    for square_number in range(len(squares) -1, 0, -1):
+    # Move the tail: each segment goes where the one in front was.
+    for square_number in range(len(squares) - 1, 0, -1):
         new_x = squares[square_number - 1].xcor()
         new_y = squares[square_number - 1].ycor()
         squares[square_number].goto(new_x, new_y)
 
-    squares[0].forward(10)
+    # Move the head forward.
+    squares[0].forward(MOVE_DISTANCE)
 
-        # Control the snake
-    screen.listen()  
-    screen.onkeypress(key="d", fun=move_right)
-    screen.onkeypress(key="a", fun=move_left)
-    
-    
-    # Create a scoreboard
-    if squares[0].distance(current_food) < 10:
-        scoreboard.clear()
+    # Check whether the snake has eaten the food.
+    if squares[0].distance(current_food) < 15:
         score += 1
-       
-        
-        
-        new_square = Turtle(shape='square')
-        new_square.penup()
-        new_square.color('gray', 'white')
-        new_square.goto(position)
-        
-        squares.append(new_square)
+        update_scoreboard()
 
+        add_segment()
 
         current_food.hideturtle()
-        current_food = food()
+        current_food = create_food()
 
-
-
-        
-        
-    scoreboard.color("white")
-    scoreboard.penup()
-    scoreboard.goto(0,250)
-    scoreboard.write(f"Score: {score}", move=False, align="center", font=("Arial", 18, "normal"))
-    scoreboard.hideturtle()     
-
-    # Detect collision with wall
-    if (squares[0].xcor()) + 10 > screen.window_width()/2 or (-squares[0].xcor()) +10 > screen.window_width()/2 or (squares[0].ycor()) + 10 > screen.window_height()/2 or (-squares[0].ycor()) + 10> screen.window_height()/2:
-        game_over.color("white")
-        game_over.pen()
-        game_over.write("Game over", move=False, align="center", font=("Arial", 18, "normal"))
-        
-        print("you lost")
+    # Check collision with the wall.
+    if abs(squares[0].xcor()) > WALL_LIMIT or abs(squares[0].ycor()) > WALL_LIMIT:
+        show_game_over()
+        print("You lost - wall collision.")
         game_is_on = False
 
-    
-    
-    # Detect colision with tail
-    for square_number in range(1, len(squares)):
+    # Check collision with any part of the tail.
+    if game_is_on:
+        for tail_segment in squares[1:]:
+            if squares[0].distance(tail_segment) < 10:
+                show_game_over()
+                print("You lost - tail collision.")
+                game_is_on = False
+                break
 
-        if squares[0].distance(squares[square_number]) < 9:
-            game_is_on = False
-
-screen.listen()
-# screen.onkey(key="a", fun=move_left)
-
-
-
+    screen.update()
+    time.sleep(0.1)
 
 
-
-
-
+screen.update()
 screen.exitonclick()
