@@ -16,21 +16,19 @@ squares = []
 
 scoreboard = Turtle()
 
-
+game_over = Turtle()
 
 
 
 for position in starting_positions:
-    new_square = Turtle(shape='square')
-    new_square.penup()
+    square = Turtle(shape='square')
+    square.penup()
 
-    new_square.color('gray', 'white')
-    new_square.goto(position)
-    squares.append(new_square)
+    square.color('gray', 'white')
+    square.goto(position)
+    squares.append(square)
 
 
-
-food_location = []
 
 def food():
 
@@ -82,12 +80,25 @@ while game_is_on:
     screen.onkeypress(key="a", fun=move_left)
     
     
+    # Create a scoreboard
     if squares[0].distance(current_food) < 10:
         scoreboard.clear()
         score += 1
+       
+        
+        
+        new_square = Turtle(shape='square')
+        new_square.penup()
+        new_square.color('gray', 'white')
+        new_square.goto(position)
+        
+        squares.append(new_square)
+
 
         current_food.hideturtle()
         current_food = food()
+
+
 
         
         
@@ -97,27 +108,31 @@ while game_is_on:
     scoreboard.write(f"Score: {score}", move=False, align="center", font=("Arial", 18, "normal"))
     scoreboard.hideturtle()     
 
+    # Detect collision with wall
+    if (squares[0].xcor()) + 10 > screen.window_width()/2 or (-squares[0].xcor()) +10 > screen.window_width()/2 or (squares[0].ycor()) + 10 > screen.window_height()/2 or (-squares[0].ycor()) + 10> screen.window_height()/2:
+        game_over.color("white")
+        game_over.pen()
+        game_over.write("Game over", move=False, align="center", font=("Arial", 18, "normal"))
+        
+        print("you lost")
+        game_is_on = False
+
     
-
-
-
-
-    # print(squares[0].xcor())
-    # print(food_x)
-    # print(squares[0].distance(food_x, food_y))   
-
-
     
+    # Detect colision with tail
+    for square_number in range(1, len(squares)):
 
+        if squares[0].distance(squares[square_number]) < 9:
+            game_is_on = False
 
 screen.listen()
 # screen.onkey(key="a", fun=move_left)
 
 
 
-# Create a scoreboard
-# Detect collision with wall
-# Detect colision with tail
+
+
+
 
 
 screen.exitonclick()
