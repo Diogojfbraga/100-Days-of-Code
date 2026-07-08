@@ -1,5 +1,6 @@
 from turtle import Turtle, Screen
 from paddle import Paddle
+from ball import Ball
 import time
 import random
 
@@ -23,6 +24,7 @@ r_paddle = Paddle((350,0))
 
 l_paddle = Paddle((-350, 0 ))
 
+ball = Ball()
 
 
 # Divider
@@ -47,17 +49,28 @@ l_paddle = Paddle((-350, 0 ))
 
 
 screen.listen()
-screen.onkey(Paddle.move_up, "Up")
-screen.onkey(Paddle.move_down, "Down")
 
+# Player Left
+screen.onkey(l_paddle.move_up, "w")
+screen.onkey(l_paddle.move_down, "s")
+
+# Player Right
+screen.onkey(r_paddle.move_up, "Up")
+screen.onkey(r_paddle.move_down, "Down")
 
 game_is_on = True
 
 while game_is_on:
+    time.sleep(0.1)
     screen.update()
 
+    ball.move()
 
+    if ball.ycor() > 280 or ball.ycor() < -280:
+        ball.bounce_wall()
 
+    if ball.xcor() < ball.distance(l_paddle) < 50 or ball.distance(r_paddle) < 50
+   
 # Create another paddle
 
 
