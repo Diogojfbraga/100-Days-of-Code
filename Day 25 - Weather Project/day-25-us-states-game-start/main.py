@@ -43,17 +43,26 @@ while len(guessed_states) < 50:
 
     # If the user types Exit, save the missing states and stop the game
     if answer_state == "Exit":
-        states_to_learn = []
-
-        for state in all_states:
-            if state not in guessed_states:
-                states_to_learn.append(state)
-
+        states_to_learn = [state for state in all_states if state not in guessed_states]
+                
         # Save missing states into a new CSV file
         new_data = pd.DataFrame(states_to_learn)
         new_data.to_csv("states_to_learn.csv")
 
         break
+
+        # if answer_state == "Exit":
+        # states_to_learn = []
+
+        # for state in all_states:
+        #     if state not in guessed_states:
+        #         states_to_learn.append(state)
+
+        # # Save missing states into a new CSV file
+        # new_data = pd.DataFrame(states_to_learn)
+        # new_data.to_csv("states_to_learn.csv")
+
+        # break
 
     # If the guess is correct, write the state name on the map
     if answer_state in all_states:
