@@ -12,15 +12,17 @@ my_email = "d######t@gmail.com"
 passoword = "### # ## # # #"
 
 
-with open("quotes.txt") as file:
-
-    for quote in file:
-        quotes.append(quote)
-
-quote_of_the_day = random.choice(quotes)
-
 if now.weekday() == 1:
+
+    with open("quotes.txt") as file:
+
+        for quote in file:
+            quotes.append(quote)
+
+    quote_of_the_day = random.choice(quotes)
+
     print(random.choice(quotes))
+    
     with smtplib.SMTP("smtp.gmail.com") as connection:
 
         connection.starttls()
