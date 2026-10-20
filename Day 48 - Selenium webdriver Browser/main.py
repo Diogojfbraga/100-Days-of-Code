@@ -1,22 +1,47 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+import datetime
 
-options = webdriver.EdgeOptions()
+options = webdriver.ChromeOptions()
 options.add_experimental_option("detach", True)
 
-driver = webdriver.Edge(options=options)
+driver = webdriver.Chrome(options=options)
 
-driver.get("https://www.amazon.co.uk/Wantek-Conduction-Headphones-Headphone-Waterproof-red/dp/B0DLK37D3B/ref=sr_1_1_sspa?crid=12JSRZXBFI5ZY&dib=eyJ2IjoiMSJ9.bKjSStRlbrH9XDP2RQh3fYbbEqo2kBU6MFsOkJ_FWC3F7gciuy1dU5W96lnnJOzArRWSQPJv5lkQ-7gdKi8SP4F2J6os52DeFv7-IG7AFyjbyJU8LejUEa881-0Uow9cIIo-5UlDziRN-dZ3eD2fTiwpIRworDrlVzXRraSOAbqa4_s1Gz628cx2UrEUkJPUaHN9QD2xN7qcJmwTdcje257D1fhBp3Jovv8hgYuP0PI.sMOr-mlhMwNFji1IzJ8ppiAUNlU2LG8QRXB-YXNZCKg&dib_tag=se&keywords=swimming+earphones+waterproof&qid=1792510546&sprefix=swiming+earph%2Caps%2C118&sr=8-1-spons&aref=tyi0TJOo3g&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&psc=1")
+driver.get("https://www.python.org/")
+
+print("Starting events extraction")
+
+events = driver.find_elements(By.CSS_SELECTOR, ".event-widget time")
+   
+
+for event in events:
+    print((event.get_attribute('datetime'))[:10])
+#     print(f"Processing event {i}")
+#     events_time = driver.find_element(By.XPATH, value=f'//*[@id="content"]/div/section/div[3]/div[2]/div/ul/li[{i}]/time')
 
 
-price_pound = driver.find_element(By.CLASS_NAME, value='a-price-whole').text
-price_pennies = driver.find_element(By.CLASS_NAME, value='a-price-fraction').text
 
-print(f'The price is {price_pound}.{price_pennies}')
+    # test = events_time.get_attribute("datetime")
+    # print(events_time.get_attribute("outerHTML"))
+    
+    # events_year = driver.find_element(By.XPATH, value=f'//*[@id="content"]/div/section/div[2]/div[2]/div/ul/li[{i}]/time/span').text
+    
+    # print(f"Event {i}: {events_time.tag_name}")
+    # print(f"Date: {test!r}")
+    # print(i)
 
-documentation_link = driver.find_element(By.CSS_SELECTOR, value=".documentation-widget a")
-print(documentation_link.text)
 
-driver.find_element(By.XPATH, value="")
+# for time in events_time:
+    # print(events_time)
 
-driver.quit()
+# price_pound = driver.find_element(By.CLASS_NAME, value='a-price-whole').text
+# price_pennies = driver.find_element(By.CLASS_NAME, value='a-price-fraction').text
+
+# # print(f'The price is {price_pound}.{price_pennies}')
+
+# # documentation_link = driver.find_element(By.CSS_SELECTOR, value=".documentation-widget a")
+# # print(documentation_link.text)
+
+# driver.find_element(By.XPATH, value="")
+
+# driver.quit()
