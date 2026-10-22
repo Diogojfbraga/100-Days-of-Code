@@ -1,47 +1,56 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import datetime
 
-options = webdriver.ChromeOptions()
+
+# ---------------------------------------------------------
+# 1. BROWSER CONFIGURATION
+# ---------------------------------------------------------
+
+# Configure Microsoft Edge to remain open after execution
+options = webdriver.EdgeOptions()
 options.add_experimental_option("detach", True)
 
-driver = webdriver.Chrome(options=options)
+# Initialise the browser
+driver = webdriver.Edge(options=options)
 
+# Open the Python website
 driver.get("https://www.python.org/")
 
-print("Starting events extraction")
 
-events = driver.find_elements(By.CSS_SELECTOR, ".event-widget time")
-   
+# ---------------------------------------------------------
+# 2. EXTRACT EVENT INFORMATION
+# ---------------------------------------------------------
 
-for event in events:
-    print((event.get_attribute('datetime'))[:10])
-#     print(f"Processing event {i}")
-#     events_time = driver.find_element(By.XPATH, value=f'//*[@id="content"]/div/section/div[3]/div[2]/div/ul/li[{i}]/time')
+print("Starting events extraction...")
 
+# Find all upcoming event dates
+events = driver.find_elements(
+    By.CSS_SELECTOR, ".event-widget time"
+)
 
-
-    # test = events_time.get_attribute("datetime")
-    # print(events_time.get_attribute("outerHTML"))
-    
-    # events_year = driver.find_element(By.XPATH, value=f'//*[@id="content"]/div/section/div[2]/div[2]/div/ul/li[{i}]/time/span').text
-    
-    # print(f"Event {i}: {events_time.tag_name}")
-    # print(f"Date: {test!r}")
-    # print(i)
+# Find all upcoming event names
+names = driver.find_elements(
+    By.CSS_SELECTOR, ".event-widget li a"
+)
 
 
-# for time in events_time:
-    # print(events_time)
+# ---------------------------------------------------------
+# 3. STORE EVENTS IN A DICTIONARY
+# ---------------------------------------------------------
 
-# price_pound = driver.find_element(By.CLASS_NAME, value='a-price-whole').text
-# price_pennies = driver.find_element(By.CLASS_NAME, value='a-price-fraction').text
+events_dict = {}
 
-# # print(f'The price is {price_pound}.{price_pennies}')
+# Pair each event date with its corresponding name
+for i, (event, name) in enumerate(zip(events, names)):
 
-# # documentation_link = driver.find_element(By.CSS_SELECTOR, value=".documentation-widget a")
-# # print(documentation_link.text)
+    events_dict[i] = {
+        "time": event.get_attribute("datetime")[:10],
+        "name": name.text
+    }
 
-# driver.find_element(By.XPATH, value="")
 
-# driver.quit()
+# ---------------------------------------------------------
+# 4. DISPLAY RESULTS
+# ---------------------------------------------------------
+
+print(events_dict)
